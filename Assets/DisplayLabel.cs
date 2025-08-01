@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Meta.XR.MRUtilityKit;
+using JetBrains.Annotations;
 
 public class DisplayLabel : MonoBehaviour
 {
@@ -10,8 +11,14 @@ public class DisplayLabel : MonoBehaviour
     public MRUKAnchor.SceneLabels labelFilter;
     public GameObject Objeto_Spawn;
 
+    //Para escribir en el nombre del objeto que se esta apuntando con el raycast, es una etiqueta normal de unity
+    public TMPro.TextMeshPro debugText;
+
     //Guarda el ultimo objeto que se instancia para que no se deba crear uno nuevo cada frame que pasa
     private GameObject spawnedObject;
+
+    //Para obtener la poscion del visor
+    public Transform centerEyeVisor;
 
 
     void Start()
@@ -28,10 +35,24 @@ public class DisplayLabel : MonoBehaviour
         MRUKRoom room = MRUK.Instance.GetCurrentRoom();
         bool hasHit = room.Raycast(ray, rayLength, filter, out RaycastHit hit, out MRUKAnchor anchor);
 
+
+
         if (hasHit)
         {
             Vector3 hitPoint = hit.point;
             Vector3 hitNormal = hit.normal;
+          
+
+            //Para obtener la etiqueta y saber que objeto , pared o techo es lo que esta apuntando el raycast
+            string label = anchor.Label.ToString();
+
+            //Colocamos al texto o etquita de unity la poicion del ray  cast y su rotacion, ademas asignamos el valor de la etiquta obtenida antes 
+            //para saber que objeto es el que estamos apuntando
+            //debugText.transform.position = hitPoint;
+            //debugText.transform.rotation = Quaternion.LookRotation(-hitNormal);
+            debugText.text = label;
+
+
 
             //Si el objeto aun no se ha creado, se crea con instantiate y con la posision obtenida del los datos del raycast
             if(spawnedObject == null)
@@ -61,14 +82,39 @@ public class DisplayLabel : MonoBehaviour
                     //color_transparente.a = 0.1f;
                     //material.color = color_transparente;
                 }
-                
+
+
+                //Creo un vector que apunte siempre en direccion al visor para despues usarlo y que la mesa caundo este en el suelo o en el techo
+                //antes de colocarla siempre apunte al visor, normalizamos este vector para que sea de longitud 1 y no cause problemas
+                Vector3 direccionVector = centerEyeVisor.position - spawnedObject.transform.position;
+                direccionVector.y = 0;
+                Vector3 direccionVectorNormalizado = direccionVector.normalized;
+
 
 
             } //Si ya se creo y esta guardado en spawnedObject ya solo lo reajustamos con los dartos actuales del raycast
             else
             {
                 spawnedObject.transform.position = hitPoint;
-                spawnedObject.transform.rotation = Quaternion.LookRotation(-hitNormal);
+
+                //Actualizamos la posicion del vector
+                Vector3 direccionVector = centerEyeVisor.position - spawnedObject.transform.position;
+                direccionVector.y = 0;
+                Vector3 direccionVectorNormalizado = direccionVector.normalized;
+
+                if (label == "FLOOR")
+                {
+                    spawnedObject.transform.rotation = Quaternion.LookRotation(-direccionVectorNormalizado);
+                }
+                else if (label == "CEILING")
+                {
+                    spawnedObject.transform.rotation = Quaternion.LookRotation(-direccionVectorNormalizado);
+                }
+                else
+                {
+                    spawnedObject.transform.rotation = Quaternion.LookRotation(-hitNormal);
+                }
+                
             }
 
         }
