@@ -31,6 +31,9 @@ public class DisplayLabel : MonoBehaviour
     Vector3 direccionVectorNormalizado;
     string label;
 
+    //Variable para activar o desactivar mecanica de colocar mesa
+    bool colocarMesa;
+
 
     void Start()
     {
@@ -40,131 +43,151 @@ public class DisplayLabel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Detecto si con la mano se esta haciendo el pinch o no, para saber si colocar la mesa o no 
+         
+        
+        if(colocarMesa == true){
 
-        if (rightHand.GetFingerIsPinching(OVRHand.HandFinger.Index) == false){
-            pinchText.text = "Pinch False :c";
+            //Detecto si con la mano se esta haciendo el pinch o no, para saber si colocar la mesa o no
+            if (rightHand.GetFingerIsPinching(OVRHand.HandFinger.Index) == false){
+                pinchText.text = "Pinch False :c";
 
-            Ray ray = new Ray(rayStartPoint.position, rayStartPoint.forward);
-            LabelFilter filter = new LabelFilter { SceneLabels = labelFilter };
+                Ray ray = new Ray(rayStartPoint.position, rayStartPoint.forward);
+                LabelFilter filter = new LabelFilter { SceneLabels = labelFilter };
 
-            MRUKRoom room = MRUK.Instance.GetCurrentRoom();
-            bool hasHit = room.Raycast(ray, rayLength, filter, out RaycastHit hit, out MRUKAnchor anchor);
+                MRUKRoom room = MRUK.Instance.GetCurrentRoom();
+                bool hasHit = room.Raycast(ray, rayLength, filter, out RaycastHit hit, out MRUKAnchor anchor);
 
 
 
-            if (hasHit)
-            {
-                hitPoint = hit.point;
-                hitNormal = hit.normal;
+                if (hasHit)
+                {
+                    hitPoint = hit.point;
+                    hitNormal = hit.normal;
 
           
 
-                //Para obtener la etiqueta y saber que objeto , pared o techo es lo que esta apuntando el raycast
-                label = anchor.Label.ToString();
+                    //Para obtener la etiqueta y saber que objeto , pared o techo es lo que esta apuntando el raycast
+                    label = anchor.Label.ToString();
 
-                //Colocamos al texto o etquita de unity la poicion del ray  cast y su rotacion, ademas asignamos el valor de la etiquta obtenida antes 
-                //para saber que objeto es el que estamos apuntando
-                //debugText.transform.position = hitPoint;
-                //debugText.transform.rotation = Quaternion.LookRotation(-hitNormal);
-                debugText.text = label;
+                    //Colocamos al texto o etquita de unity la poicion del ray  cast y su rotacion, ademas asignamos el valor de la etiquta obtenida antes 
+                    //para saber que objeto es el que estamos apuntando
+                    //debugText.transform.position = hitPoint;
+                    //debugText.transform.rotation = Quaternion.LookRotation(-hitNormal);
+                    debugText.text = label;
 
 
 
-                //Si el objeto aun no se ha creado, se crea con instantiate y con la posision obtenida del los datos del raycast
-                if(spawnedObject == null)
-                {
-                    spawnedObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-hitNormal));
-
-                    //Desactivo todos los box Colliders de la mesa para que esta no tenga colisiones con objetos en el entorno y sea solo como un objeto fantasma
-                    BoxCollider[] spawnedObjectColliders = spawnedObject.GetComponentsInChildren<BoxCollider>();
-                    foreach (BoxCollider col in spawnedObjectColliders)
+                    //Si el objeto aun no se ha creado, se crea con instantiate y con la posision obtenida del los datos del raycast
+                    if(spawnedObject == null)
                     {
-                        col.enabled = false;
-                    }
+                        spawnedObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-hitNormal));
 
-                    //Obtener todos los mesh renderer de los hijos de spawnedObject, es decir de sus componentes del modelo, cube, cube001, etc y de ellos obtener su
-                    //mesh renderer para modificarlos todos
+                        //Desactivo todos los box Colliders de la mesa para que esta no tenga colisiones con objetos en el entorno y sea solo como un objeto fantasma
+                        BoxCollider[] spawnedObjectColliders = spawnedObject.GetComponentsInChildren<BoxCollider>();
+                        foreach (BoxCollider col in spawnedObjectColliders)
+                        {
+                            col.enabled = false;
+                        }
 
-                    MeshRenderer[] renderers_hijos = spawnedObject.GetComponentsInChildren<MeshRenderer>();
+                        //Obtener todos los mesh renderer de los hijos de spawnedObject, es decir de sus componentes del modelo, cube, cube001, etc y de ellos obtener su
+                        //mesh renderer para modificarlos todos
 
-                    foreach (MeshRenderer renderer in renderers_hijos)
-                    {
-                        //Esto es lo que obtuve para cada componenete del modelo
-                        //comp1_material = comp1.GetComponent<MeshRenderer>().material;
+                        MeshRenderer[] renderers_hijos = spawnedObject.GetComponentsInChildren<MeshRenderer>();
 
-                        //Se obtiene el material del modelo, se obtiene su color, se mofiica en este el canal alfa y despues se vuelve a asignar al modelo
-                        Material material = renderer.material;
-                        Color colortransparente = material.color;
-                        colortransparente.a = 0.5f;
-                        material.color = colortransparente;
+                        foreach (MeshRenderer renderer in renderers_hijos)
+                        {
+                            //Esto es lo que obtuve para cada componenete del modelo
+                            //comp1_material = comp1.GetComponent<MeshRenderer>().material;
+
+                            //Se obtiene el material del modelo, se obtiene su color, se mofiica en este el canal alfa y despues se vuelve a asignar al modelo
+                            Material material = renderer.material;
+                            Color colortransparente = material.color;
+                            colortransparente.a = 0.5f;
+                            material.color = colortransparente;
                     
-                        //Esta podria ser otra forma donde creo un color desde 0 en blanco y le modifico
-                        //El canal alfa para despues asignar ese color al modelo que quiero hacer transparente
-                        //color_transparente = Color.white;
-                        //color_transparente.a = 0.1f;
-                        //material.color = color_transparente;
+                            //Esta podria ser otra forma donde creo un color desde 0 en blanco y le modifico
+                            //El canal alfa para despues asignar ese color al modelo que quiero hacer transparente
+                            //color_transparente = Color.white;
+                            //color_transparente.a = 0.1f;
+                            //material.color = color_transparente;
+                        }
+
+
+                        //Creo un vector que apunte siempre en direccion al visor para despues usarlo y que la mesa caundo este en el suelo o en el techo
+                        //antes de colocarla siempre apunte al visor, normalizamos este vector para que sea de longitud 1 y no cause problemas
+                        Vector3 direccionVector = centerEyeVisor.position - spawnedObject.transform.position;
+                        direccionVector.y = 0;
+                        direccionVectorNormalizado = direccionVector.normalized;
+
+
+
+                    } //Si ya se creo y esta guardado en spawnedObject ya solo lo reajustamos con los dartos actuales del raycast
+                    else
+                    {
+                        spawnedObject.transform.position = hitPoint;
+
+                        //Actualizamos la posicion del vector
+                        Vector3 direccionVector = centerEyeVisor.position - spawnedObject.transform.position;
+                        direccionVector.y = 0;
+                        direccionVectorNormalizado = direccionVector.normalized;
+
+                        if (label == "FLOOR")
+                        {
+                            spawnedObject.transform.rotation = Quaternion.LookRotation(-direccionVectorNormalizado);
+                        }
+                        else if (label == "CEILING")
+                        {
+                            spawnedObject.transform.rotation = Quaternion.LookRotation(-direccionVectorNormalizado);
+                        }
+                        else
+                        {
+                            spawnedObject.transform.rotation = Quaternion.LookRotation(-hitNormal);
+                        }
+                
                     }
 
+                }
 
-                    //Creo un vector que apunte siempre en direccion al visor para despues usarlo y que la mesa caundo este en el suelo o en el techo
-                    //antes de colocarla siempre apunte al visor, normalizamos este vector para que sea de longitud 1 y no cause problemas
-                    Vector3 direccionVector = centerEyeVisor.position - spawnedObject.transform.position;
-                    direccionVector.y = 0;
-                    direccionVectorNormalizado = direccionVector.normalized;
+            }else{
+                pinchText.text = "Pinch True c:";
 
-
-
-                } //Si ya se creo y esta guardado en spawnedObject ya solo lo reajustamos con los dartos actuales del raycast
-                else
-                {
-                    spawnedObject.transform.position = hitPoint;
-
-                    //Actualizamos la posicion del vector
-                    Vector3 direccionVector = centerEyeVisor.position - spawnedObject.transform.position;
-                    direccionVector.y = 0;
-                    direccionVectorNormalizado = direccionVector.normalized;
+                if (RealObject == null){
 
                     if (label == "FLOOR")
                     {
-                        spawnedObject.transform.rotation = Quaternion.LookRotation(-direccionVectorNormalizado);
+                        RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-direccionVectorNormalizado));
                     }
                     else if (label == "CEILING")
                     {
-                        spawnedObject.transform.rotation = Quaternion.LookRotation(-direccionVectorNormalizado);
+                        RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-direccionVectorNormalizado));
                     }
                     else
                     {
-                        spawnedObject.transform.rotation = Quaternion.LookRotation(-hitNormal);
+                        RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-hitNormal));
                     }
                 
+
+                    Rigidbody rb = RealObject.AddComponent<Rigidbody>();
+                    rb.useGravity = true;
                 }
-
-            }
-
-        }else{
-            pinchText.text = "Pinch True c:";
-
-            if (RealObject == null){
-
-                if (label == "FLOOR")
-                {
-                    RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-direccionVectorNormalizado));
-                }
-                else if (label == "CEILING")
-                {
-                    RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-direccionVectorNormalizado));
-                }
-                else
-                {
-                    RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-hitNormal));
-                }
-                
-
-                Rigidbody rb = RealObject.AddComponent<Rigidbody>();
-                rb.useGravity = true;
             }
         }
+    
+    
+
+
+    }
+
+    public void ActivarColocarMesa(){
+        colocarMesa = true;
+    }
+
+    public void DesactivarColocarMesa(){
+        colocarMesa = false;
+        Destroy(spawnedObject);
+        spawnedObject = null;
+        Destroy(RealObject);
+        RealObject = null;
 
     }
 }
