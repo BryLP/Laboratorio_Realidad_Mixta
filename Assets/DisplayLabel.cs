@@ -33,6 +33,7 @@ public class DisplayLabel : MonoBehaviour
 
     //Variable para activar o desactivar mecanica de colocar mesa
     bool colocarMesa;
+    bool tableIsSet = false;
 
 
     void Start()
@@ -48,7 +49,7 @@ public class DisplayLabel : MonoBehaviour
         if(colocarMesa == true){
 
             //Detecto si con la mano se esta haciendo el pinch o no, para saber si colocar la mesa o no
-            if (rightHand.GetFingerIsPinching(OVRHand.HandFinger.Index) == false){
+            if (rightHand.GetFingerIsPinching(OVRHand.HandFinger.Index) == false && tableIsSet == false){
                 pinchText.text = "Pinch False :c";
 
                 Ray ray = new Ray(rayStartPoint.position, rayStartPoint.forward);
@@ -156,14 +157,20 @@ public class DisplayLabel : MonoBehaviour
                     if (label == "FLOOR")
                     {
                         RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-direccionVectorNormalizado));
+                        tableIsSet = true;
+                        Destroy(spawnedObject);
                     }
                     else if (label == "CEILING")
                     {
                         RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-direccionVectorNormalizado));
+                        tableIsSet = true;
+                        Destroy(spawnedObject);
                     }
                     else
                     {
                         RealObject = Instantiate(Objeto_Spawn, hitPoint, Quaternion.LookRotation(-hitNormal));
+                        tableIsSet = true;
+                        Destroy(spawnedObject);
                     }
                 
 
@@ -188,6 +195,7 @@ public class DisplayLabel : MonoBehaviour
         spawnedObject = null;
         Destroy(RealObject);
         RealObject = null;
+        tableIsSet = false;
 
     }
 }
