@@ -174,8 +174,8 @@ public class DisplayLabel : MonoBehaviour
                     }
                 
 
-                    Rigidbody rb = RealObject.AddComponent<Rigidbody>();
-                    rb.useGravity = true;
+                    //Rigidbody rb = RealObject.AddComponent<Rigidbody>();
+                    //rb.useGravity = true;
                 }
             }
         }
