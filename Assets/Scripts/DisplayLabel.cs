@@ -173,7 +173,7 @@ public class DisplayLabel : MonoBehaviour
                         Destroy(spawnedObject);
                     }
                 
-
+                    //Rigidbody rb = RealObject.GetComponent<Rigidbody>();
                     //Rigidbody rb = RealObject.AddComponent<Rigidbody>();
                     //rb.useGravity = true;
                 }
