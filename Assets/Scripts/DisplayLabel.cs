@@ -134,6 +134,8 @@ public class DisplayLabel : MonoBehaviour
 
                         if (label == "FLOOR")
                         {
+                            hitPoint.y += 0.3f;
+                            spawnedObject.transform.position = hitPoint;
                             spawnedObject.transform.rotation = Quaternion.LookRotation(-direccionVectorNormalizado);
                         }
                         else if (label == "CEILING")
