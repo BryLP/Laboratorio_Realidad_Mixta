@@ -36,20 +36,23 @@ public class ChangeSizeWithHands : MonoBehaviour
 
             if(ResizeObject == null){
                 ResizeObject = Instantiate(objectPrueba, posicion.position, objectPrueba.transform.rotation);
+            }else if(ResizeObject != null && distanceOriginal == 0){
                 distanceOriginal = Vector3.Distance(rightHand.transform.position, leftHand.transform.position);
             }else{
                 //Calculando distancia entre manos
                 distanceUpdate = Vector3.Distance(rightHand.transform.position, leftHand.transform.position);
-
+                    
                 //Obteniendo el cambio de la distancia entre las manos
-                float cambio = distanceOriginal/ 
+                float cambio = distanceUpdate-distanceOriginal;
                 
                 //
-                ResizeObject.transform.localScale = new Vector3(escala, escala, escala);
-                pinchAmbasManosText.text = "Pinch en ambas manos activado c: "+distance;
+                ResizeObject.transform.localScale = new Vector3(0.02f + cambio, 0.02f+cambio, 0.02f+cambio);
+                pinchAmbasManosText.text = "Pinch en ambas manos activado c: Update Distance= "+distanceUpdate+"Original Distance= "+distanceOriginal+" cambio = "+cambio;
             }
             
-        } 
+        }else{
+            distanceOriginal = 0;
+        }
     }
     
 }
