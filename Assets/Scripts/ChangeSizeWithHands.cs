@@ -18,6 +18,7 @@ public class ChangeSizeWithHands : MonoBehaviour
     float distanceOriginal;
     float distanceUpdate;
     float escala;
+    Vector3 escalaActual;
 
 
     
@@ -32,21 +33,34 @@ public class ChangeSizeWithHands : MonoBehaviour
     {   
         pinchAmbasManosText.text = "No hay pinch en ambas manos";
         
+        //Se detecta si se esta realizando el pinch con ambas manos
         if(rightHand.GetFingerIsPinching(OVRHand.HandFinger.Index) == true && leftHand.GetFingerIsPinching(OVRHand.HandFinger.Index) == true){
 
+            //La primera vez que se hace el pinch y que no se ha generado el objeto 
             if(ResizeObject == null){
+                //Se instancia el objeto 
                 ResizeObject = Instantiate(objectPrueba, posicion.position, objectPrueba.transform.rotation);
             }else if(ResizeObject != null && distanceOriginal == 0){
+                //Segunda vez en adelante que se hace el pinch con ambas manos, el objeto ya existe pero se quiere volver a modificar su tamaño
+                //Reincio el calculo de la distancia entre las manos
+                //Se actualiza la distancia Original, es decir se guarda la primera distancia entre las manos desde el momento justo donde se pinch doble, la distancia
+                //Original entre las manos desde la primera vez que se hace el pinch, este sera el eje de referencia
                 distanceOriginal = Vector3.Distance(rightHand.transform.position, leftHand.transform.position);
+
+                //Obtenemos la escalas actuales del objeto
+                escalaActual = ResizeObject.transform.localScale;
             }else{
+                //Se actualiza el tamaño del objeto a partir del cambio de distancia entre ambas manos durante el pinch doble 
+
                 //Calculando distancia entre manos
                 distanceUpdate = Vector3.Distance(rightHand.transform.position, leftHand.transform.position);
                     
-                //Obteniendo el cambio de la distancia entre las manos
+                //Obteniendo el cambio de la distancia entre las manos a partir de la original
                 float cambio = distanceUpdate-distanceOriginal;
                 
-                //
-                ResizeObject.transform.localScale = new Vector3(0.02f + cambio, 0.02f+cambio, 0.02f+cambio);
+
+                //Actualizamos el tamaño del objeto
+                ResizeObject.transform.localScale = new Vector3(escalaActual.x + cambio, escalaActual.y + cambio, escalaActual.z + cambio);
                 pinchAmbasManosText.text = "Pinch en ambas manos activado c: Update Distance= "+distanceUpdate+"Original Distance= "+distanceOriginal+" cambio = "+cambio;
             }
             

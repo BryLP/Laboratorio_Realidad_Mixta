@@ -12058,7 +12058,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rightHand: {fileID: 1458336885}
   leftHand: {fileID: 1544868343}
-  objectPrueba: {fileID: 354856545423426960, guid: 8a5d2cbdda9d11b4faa295d4d93f8308, type: 3}
+  objectPrueba: {fileID: 1606028144737912321, guid: 5b2ee712a67ca5a40aa3af56e3f62eb6, type: 3}
   posicion: {fileID: 536036627}
   pinchAmbasManosText: {fileID: 330670103}
 --- !u!4 &880582511
